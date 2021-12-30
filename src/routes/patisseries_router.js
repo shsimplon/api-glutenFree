@@ -19,21 +19,33 @@ router.get("/:name", async (request, response) => {
   response.status(OK).json(patisserie);
 });
 
-router.post("/", async (request, response) => {
-  if (!request.files) {
-    response.send({
-      status: false,
-      message: "No file uploaded",
+router.post("/", async (req, res) => {
+  if (!req.files) {
+    return res.status(400).json({
+      message: "vous devez uploadez une image",
+    });
+  }
+  if (
+    req.files.avatar.mimetype != "image/jpg" &&
+    req.files.avatar.mimetype != "image/png" &&
+    req.files.avatar.mimetype != "image/jpeg"
+  ) {
+    return res.status(405).json({
+      message: "le format doit etre (jpg,png,jpeg)",
+    });
+  } else if (req.files.avatar.size > 1000000) {
+    return res.status(405).json({
+      message: "la taille doit etre inférieur à 10MB",
     });
   } else {
-    let avatar = request.files.avatar;
+    let avatar = req.files.avatar;
+
     const img = avatar.data;
     const data = img.toString("base64");
-    request.body.image = data;
-    await avatar.mv("./public/uploads/" + avatar.name);
+    req.body.image = data;
 
-    const newPatisserie = await addPatisserie(request.body);
-    response.status(CREATED).json(newPatisserie);
+    const newPatisserie = await addPatisserie(req.body);
+    res.status(CREATED).json(newPatisserie);
   }
 });
 router.put("/:id", async (request, response) => {

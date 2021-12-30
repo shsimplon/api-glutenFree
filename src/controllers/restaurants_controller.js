@@ -34,14 +34,7 @@ const restaurantController = {
     if (Restaurant) {
       throw new BadRequestError("Le Restaurant exist deja");
     } else {
-      console.log(image);
-      const newRestaurant = await restaurant.create({
-        name,
-        place,
-        description,
-        image,
-        lien,
-      });
+      const newRestaurant = await restaurant.create(data);
       return newRestaurant;
     }
   },

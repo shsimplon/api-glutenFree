@@ -19,21 +19,33 @@ router.get("/:name", async (request, response) => {
   response.status(OK).json(restaurant);
 });
 
-router.post("/", async (request, response) => {
-  if (!request.files) {
-    response.send({
-      status: false,
-      message: "No file uploaded",
+router.post("/", async (req, res) => {
+  if (!req.files) {
+    return res.status(400).json({
+      message: "vous devez uploadez une image",
+    });
+  }
+  if (
+    req.files.avatar.mimetype != "image/jpg" &&
+    req.files.avatar.mimetype != "image/png" &&
+    req.files.avatar.mimetype != "image/jpeg"
+  ) {
+    return res.status(405).json({
+      message: "le format doit etre (jpg,png,jpeg)",
+    });
+  } else if (req.files.avatar.size > 1000000) {
+    return res.status(405).json({
+      message: "la taille doit etre inférieur à 10MB",
     });
   } else {
-    let avatar = request.files.avatar;
+    let avatar = req.files.avatar;
+
     const img = avatar.data;
     const data = img.toString("base64");
-    request.body.image = data;
-    await avatar.mv("./public/uploads/" + avatar.name);
+    req.body.image = data;
 
-    const newRestaurant = await addRestaurant(request.body);
-    response.status(CREATED).json(newRestaurant);
+    const newRestaurant = await addRestaurant(req.body);
+    res.status(CREATED).json(newRestaurant);
   }
 });
 router.put("/:id", async (request, response) => {
